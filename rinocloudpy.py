@@ -1,6 +1,3 @@
-from six.moves.urllib.request import Request, urlopen
-from six.moves.urllib.error import HTTPError
-from six.moves.urllib.parse import urlencode #probably don't need these
 import json
 import requests
 
@@ -47,12 +44,6 @@ def _byteify(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
-def dictionary_clean_up(dictionary):
-    new_dict = dictionary.copy()
-    for key in ['created_on', 'created_on_str', 'filepath', 'metadata', 'owner', 'project', 'project_name', 'share_code', 'shared', 'size', 'size_str', 'type', 'updated_on', 'updated_on_str' ]:
-        new_dict.pop(key, None)
-    return new_dict
-
 class RinoRequests(object):
 
     @classmethod
@@ -78,39 +69,47 @@ class RinoRequests(object):
 
 
 class Object(RinoRequests):
-    def __init__(self, metadata = {}, filepath='File path not specified.', parent = None, tags = None, id=None):
-        self.filepath = filepath
+    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, **kwargs):
+        self.file = file
         self.parent = parent
         self.tags = tags
         self.id = id
+        self.metadata = metadata
         self.__dict__.update(metadata)
+        self.metadata.update({'parent' : self.parent, 'tags' : self.tags, 'id' : self.id})
+        self.__dict__.update(kwargs.pop('Obj_from_dict', ''))
+        
+    def metadata_dict_update(self):
+        self.metadata.update({'parent' : self.parent, 'tags' : self.tags, 'id' : self.id})
    
     def add(self, params):
-        self.__dict__.update(metadata)
+        self.metadata.update(params)
+        self.__dict__.update(params)
     
     def upload(self):
+        self.metadata_dict_update()
         uri = 'files/upload_multipart/'
-        file = {'file': open(self.filepath, 'rb')}
-        response = self.__class__.POST(uri, _data = {'json': json.dumps(dictionary_clean_up(self.__dict__))}, _file = file)
+        response = self.__class__.POST(uri, _data = {'json': json.dumps(self.metadata)}, _file = {'file': self.file})
         self.__dict__.update(json_loads_byteified(response._content))
-        # instead of returning something - update dict.
-        # include hidden object to check if upload has already been called and throw error if there is no filepath specified
 
     def get(self):
         uri = 'files/get_metadata/'
         response = self.__class__.POST(uri, _data = {'id': self.id})
         dictionary = json_loads_byteified(response._content)
-        metadata_dictionary = dictionary.get('metadata')
+        self.metadata = dictionary.get('metadata')
         self.__dict__.update(dictionary)
-        self.__dict__.update(metadata_dictionary)
+        self.__dict__.update(self.metadata)
 
     def update(self):
+        self.metadata_dict_update()
         uri = 'files/update_metadata/'
-        response = self.__class__.POST(uri, _data = dictionary_clean_up(self.__dict__))
+        response = self.__class__.POST(uri, _data = self.metadata_dict)
         dictionary = json_loads_byteified(response._content)
-        metadata_dictionary = dictionary.get('metadata')
+        print dictionary
+        print dictionary.get('metadata')
+        self.metadata = dictionary.get('metadata')
         self.__dict__.update(dictionary)
-        self.__dict__.update(metadata_dictionary)
+        self.__dict__.update(self.metadata)
         
     def download(self, *filename):
         uri = 'files/download/?id=' + str(self.id)
@@ -127,11 +126,48 @@ class Object(RinoRequests):
                 if chunk:
                     f.write(chunk)
         return local_filename
-        
+    
+class Queryset(RinoRequests):
 
+    def __init__(self, dictionary = {}, results = {'results' : 'The query method has not yet been called.'}):
+        self.dictionary = dictionary
+        self.results = results
 
-        # to add: 
-        # update: updates metadata
-        # download: downloads file 
+    OPERATORS = [
+        'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or' 
+    ]
 
+    @classmethod
+    def extract_filter_operator(cls, parameter):
+        for op in cls.OPERATORS:
+            underscored = '__%s' % op
+            if parameter.endswith(underscored):
+                return parameter[:-len(underscored)], op
+        return parameter, None
 
+    def filter(self, **kw):
+        #q = copy.deepcopy(self)
+        for name, value in kw.items():
+            attr, operator = Queryset.extract_filter_operator(name)
+            if operator is None:
+                self.dictionary[attr] = value
+            elif operator is 'or':
+                option_list = []
+                for option in value:
+                    option_list.append({attr : option})
+                self.dictionary['$' + operator] = option_list
+            else:
+                if attr in self.dictionary:
+                    self.dictionary[attr]['$'+ operator] = value
+                else:
+                    self.dictionary[attr] = {'$'+ operator : value}      
+        return self
+
+    def query(self):
+         uri = 'files/query/'
+         response = self.__class__.POST(uri, _json = {'query' : self.dictionary})        
+         reply = json_loads_byteified(response._content)
+         self.results = []
+         for obj in reply['result']:
+            self.results.append(Object(Obj_from_dict=obj)) 
+         return self.results
