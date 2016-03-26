@@ -1,5 +1,10 @@
 import json
 import requests
+import copy
+
+API_ROOT = 'http://staging.rinocloud.com/api/1/'
+URI = {'upload' : 'files/upload_multipart/', 'get' : 'files/get_metadata/' ,'update' : 'files/update_metadata/',
+           'download' : 'files/download/?id=', 'query' : 'files/query/'}
 
 def authenticate(*args):
     if len(args)>1:
@@ -16,10 +21,6 @@ def authenticate(*args):
         return 'Token ' + rinocloud_auth_token
     except:
         raise Exception('Set your API token using the authenticate function.') 
-
-API_ROOT = 'http://staging.rinocloud.com/api/1/'
-CONNECTION_TIMEOUT = 60
-
 
 def json_loads_byteified(json_text):
     return _byteify(
@@ -44,8 +45,9 @@ def _byteify(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
-class RinoRequests(object):
 
+class RinoRequests(object):
+    
     @classmethod
     def GET(cls, uri, **kw):
         return cls.execute(uri, 'GET', **kw)
@@ -69,64 +71,102 @@ class RinoRequests(object):
 
 
 class Object(RinoRequests):
-    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, **kwargs):
+    
+    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {},  **kwargs):
         self.file = file
         self.parent = parent
         self.tags = tags
         self.id = id
         self.metadata = metadata
+        self.__recieved_metadata__ = __recieved_metadata__
         self.__dict__.update(metadata)
-        self.metadata.update({'parent' : self.parent, 'tags' : self.tags, 'id' : self.id})
         self.__dict__.update(kwargs.pop('Obj_from_dict', ''))
-        
-    def metadata_dict_update(self):
-        self.metadata.update({'parent' : self.parent, 'tags' : self.tags, 'id' : self.id})
-   
+
     def add(self, params):
         self.metadata.update(params)
-        self.__dict__.update(params)
+        self.__dict__.update(metadata)
     
     def upload(self):
-        self.metadata_dict_update()
-        uri = 'files/upload_multipart/'
-        response = self.__class__.POST(uri, _data = {'json': json.dumps(self.metadata)}, _file = {'file': self.file})
-        self.__dict__.update(json_loads_byteified(response._content))
-
+        self._prep_metadata_for_sending()
+        response = self.__class__.POST(URI['upload'], _data = {'json': json.dumps(self.metadata)}, _file = {'file': self.file})
+        self._process_returned_metadata(response)
+               
     def get(self):
-        uri = 'files/get_metadata/'
-        response = self.__class__.POST(uri, _data = {'id': self.id})
-        dictionary = json_loads_byteified(response._content)
-        self.metadata = dictionary.get('metadata')
-        self.__dict__.update(dictionary)
-        self.__dict__.update(self.metadata)
+        response = self.__class__.POST(URI['get'], _data = {'id': self.id})
+        self._process_returned_metadata(response)
 
     def update(self):
-        self.metadata_dict_update()
+        self._prep_metadata_for_sending()
         uri = 'files/update_metadata/'
-        response = self.__class__.POST(uri, _data = self.metadata_dict)
-        dictionary = json_loads_byteified(response._content)
-        print dictionary
-        print dictionary.get('metadata')
-        self.metadata = dictionary.get('metadata')
-        self.__dict__.update(dictionary)
-        self.__dict__.update(self.metadata)
-        
-    def download(self, *filename):
-        uri = 'files/download/?id=' + str(self.id)
-        if filename:
-            local_filename = filename
-        elif self.name:
-            local_filename = self.name
-        else:
-            self.get()
-            local_filename = self.name
-        response = self.__class__.GET(uri, _stream=True)
+        response = self.__class__.POST(URI['update'], _data = self.metadata)
+        self._process_returned_metadata(response)
+ 
+    def download(self, newname = None):
+        local_filename = self._extract_name(newname)
+        response = self.__class__.GET(URI['download'] + str(self.id), _stream=True)
         with open(local_filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
         return local_filename
     
+    # Local saving and loading
+    def save_local(self, newname = None):
+        contents = self.file.read()
+        localfile = open(self._extract_name(newname), "wb")
+        localfile.write(contents)
+        localfile.close()
+        
+    def save_json_local(self, newname = None):
+        self._prep_metadata_for_sending()
+        _local_saving_dict = copy.deepcopy(self.__dict__)
+        _local_saving_dict.pop('file')
+        jsonfile = open(self._extract_name(newname) + '.json', 'w')
+        jsonfile.write(json.dumps(_local_saving_dict))
+        jsonfile.close()
+        
+    def get_from_json_local(self, jsonfile):
+        jf = open(jsonfile, 'r')
+        jsondata=jf.read()
+        self.__recieved_metadata__.update(json_loads_byteified(jsondata))
+        self.__dict__.update(self.__recieved_metadata__)
+        jf.close()
+    
+    # -----------------------------------------------------
+    def _prep_metadata_for_sending(self):
+        self.metadata.update(self.__dict__)
+        self.metadata.pop('metadata')
+        for key in self.__recieved_metadata__:
+            try:
+                self.metadata.pop(key)
+            except:
+                pass
+        try:
+            self.metadata.pop('file')
+        except:
+            pass
+        try:
+            self.metadata.pop('__recieved_metadata__')
+        except:
+            pass
+        
+    def _process_returned_metadata(self, response):
+        self.__recieved_metadata__.update(json_loads_byteified(response._content))
+        self.__dict__.update(self.__recieved_metadata__)
+        
+    def _extract_name(self, newname = None):
+        try:
+            if newname is not None:
+                local_file_name = newname
+            elif 'name' in vars():
+                local_file_name = self.name
+            else:
+                local_file_name = self.file.name
+            return local_file_name 
+        except:
+            self.get()
+            return self.name
+
 class Queryset(RinoRequests):
 
     def __init__(self, dictionary = {}, results = {'results' : 'The query method has not yet been called.'}):
@@ -146,7 +186,6 @@ class Queryset(RinoRequests):
         return parameter, None
 
     def filter(self, **kw):
-        #q = copy.deepcopy(self)
         for name, value in kw.items():
             attr, operator = Queryset.extract_filter_operator(name)
             if operator is None:
@@ -164,8 +203,7 @@ class Queryset(RinoRequests):
         return self
 
     def query(self):
-         uri = 'files/query/'
-         response = self.__class__.POST(uri, _json = {'query' : self.dictionary})        
+         response = self.__class__.POST(URI['query'], _json = {'query' : self.dictionary})        
          reply = json_loads_byteified(response._content)
          self.results = []
          for obj in reply['result']:
