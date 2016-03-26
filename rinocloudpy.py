@@ -45,6 +45,32 @@ def _byteify(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
+class batch:
+    @staticmethod
+    def download(obj_list):
+        for obj in obj_list:
+            obj.download()
+    
+    @staticmethod
+    def upload(obj_list):
+        for obj in obj_list:
+            obj.upload()
+
+    @staticmethod        
+    def add(obj_list, params):
+        for obj in obj_list:
+            obj.add(params)
+
+    @staticmethod       
+    def get(obj_list):
+        for obj in obj_list:
+            obj.get()
+
+    @staticmethod        
+    def update(obj_list):
+        for obj in obj_list:
+            obj.update()
+    
 
 class RinoRequests(object):
     
@@ -71,6 +97,8 @@ class RinoRequests(object):
 
 
 class Object(RinoRequests):
+    
+    #allow user to pass json file ate object creation
     
     def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {},  **kwargs):
         self.file = file
