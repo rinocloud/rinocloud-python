@@ -1,6 +1,8 @@
 import json
 import requests
 import copy
+import glob
+import os
 
 API_ROOT = 'http://staging.rinocloud.com/api/1/'
 URI = {'upload' : 'files/upload_multipart/', 'get' : 'files/get_metadata/' ,'update' : 'files/update_metadata/',
@@ -45,7 +47,7 @@ def _byteify(data, ignore_dicts = False):
     # if it's anything else, return it in its original form
     return data
 
-class batch:
+class batch():
     @staticmethod
     def download(obj_list):
         for obj in obj_list:
@@ -71,9 +73,42 @@ class batch:
         for obj in obj_list:
             obj.update()
     
+    @staticmethod
+    def objects_from_filename_list(file_list, json_from_file=True):
+        #test if it works for single files
+        obj_list = []
+        for filename in file_list:
+            obj_list.append(Object(file=open(filename, "rb")))
+        if json_from_file == True:
+            for obj in obj_list:
+                try:
+                    obj.get_from_json_local(obj.file.name + '.json')
+                except:
+                    pass
+        return obj_list
+    
+    @staticmethod
+    def objects_from_folder(folder_path, file_type=None, json_from_file=True):
+        if file_type == None:
+            file_list = glob.glob(folder_path + '/*')
+            for filename in file_list:
+                if '.json' == os.path.splitext(filename)[1]:
+                    aList.remove(filename);
+        else:
+            file_list = glob.glob(folder_path + '/*' + file_type)
+        
+        
+        #test this - check that filenames are returned as a list
+        return objects_from_filename_list(file_list, json_from_file=json_from_file)
+        
+    #include if needed
+    #@staticmethod
+    #def objects_from_file_pointer_list(file_pointer_list):
+    #    pass
+        # move stuff from objects_from_filename_list here and point that function here.
+    
 
 class RinoRequests(object):
-    
     @classmethod
     def GET(cls, uri, **kw):
         return cls.execute(uri, 'GET', **kw)
@@ -97,10 +132,8 @@ class RinoRequests(object):
 
 
 class Object(RinoRequests):
-    
-    #allow user to pass json file ate object creation
-    
-    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {},  **kwargs):
+    # set so that kwargs can be used to set variables.
+    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
         self.file = file
         self.parent = parent
         self.tags = tags
@@ -109,6 +142,14 @@ class Object(RinoRequests):
         self.__recieved_metadata__ = __recieved_metadata__
         self.__dict__.update(metadata)
         self.__dict__.update(kwargs.pop('Obj_from_dict', ''))
+        for name, value in kwargs.items():
+            self.__dict__[name] = value
+        if use_local_metadata==True:
+            try:
+                self.get_from_json_local(self.file.name + '.json')
+            except:
+                pass
+        self.__dict__.pop('use_local_metadata', '')
 
     def add(self, params):
         self.metadata.update(params)
