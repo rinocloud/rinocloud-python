@@ -97,8 +97,7 @@ class batch():
         else:
             file_list = glob.glob(folder_path + '/*' + file_type)
         
-        
-        #test this - check that filenames are returned as a list
+
         return objects_from_filename_list(file_list, json_from_file=json_from_file)
         
     #include if needed
@@ -133,7 +132,7 @@ class RinoRequests(object):
 
 class Object(RinoRequests):
     # set so that kwargs can be used to set variables.
-    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
+    def __init__(self, metadata = {}, file=None, parent = None, tags = [], id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
         self.file = file
         self.parent = parent
         self.tags = tags
@@ -236,7 +235,7 @@ class Object(RinoRequests):
             self.get()
             return self.name
 
-class Queryset(RinoRequests):
+class Query(RinoRequests):
 
     def __init__(self, dictionary = {}, results = {'results' : 'The query method has not yet been called.'}):
         self.dictionary = dictionary
@@ -270,7 +269,19 @@ class Queryset(RinoRequests):
                 else:
                     self.dictionary[attr] = {'$'+ operator : value}      
         return self
-
+    
+    def print_filter(self):
+        print self.dictionary
+        
+    def return_filter(self):
+        return self.dictionary
+        
+    def remove_filter(self, key=None):
+        if key == None:
+            self.dictionary = {}
+        else:
+            self.dictionary.pop(key)
+    
     def query(self):
          response = self.__class__.POST(URI['query'], _json = {'query' : self.dictionary})        
          reply = json_loads_byteified(response._content)
