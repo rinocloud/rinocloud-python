@@ -132,7 +132,7 @@ class RinoRequests(object):
 
 class Object(RinoRequests):
     # set so that kwargs can be used to set variables.
-    def __init__(self, metadata = {}, file=None, parent = None, tags = [], id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
+    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
         self.file = file
         self.parent = parent
         self.tags = tags
@@ -255,14 +255,18 @@ class Query(RinoRequests):
 
     def filter(self, **kw):
         for name, value in kw.items():
-            attr, operator = Queryset.extract_filter_operator(name)
+            attr, operator = Query.extract_filter_operator(name)
             if operator is None:
-                self.dictionary[attr] = value
+                self.dictionary[attr] = value 
             elif operator is 'or':
                 option_list = []
-                for option in value:
-                    option_list.append({attr : option})
-                self.dictionary['$' + operator] = option_list
+                if '$or' in self.dictionary:
+                    option_list = self.dictionary['$or']
+                    option_list.append({attr : value})
+                    self.dictionary['$' + operator] = option_list
+                else:
+                    option_list.append({attr : value})
+                    self.dictionary['$' + operator] = option_list
             else:
                 if attr in self.dictionary:
                     self.dictionary[attr]['$'+ operator] = value

@@ -119,6 +119,24 @@ obj.download('<new file name>')
 ```
 
 #Local operation
+Rinocloudpy objects can also save data and metadata locally. To save a file locally (provided that the file pointer has been specified), enter:
+```python
+obj.save_local()
+```
+Optionally, you can specify a new filename:
+```python
+obj.save_local('<new filename>')
+```
+
+Similarly, metadata can be saved locally (as a .json file) by entering:
+```python
+obj.save_json_local('<optional new filename>')
+```
+
+It is also possible to load metadata saved in a local file to an object using:
+```python
+obj.get_from_json_local(<'json filename'>)
+```
 
 # Querying
 Rinocloudpy also contains tools for querying. You can query any and multiple metadata fields of all objects saved to Rinocloud.
@@ -149,6 +167,13 @@ It is possible to add multiple filters, so to see only results where 'key2' is n
 ```python
 qobj.filter(key2__nin=[1,2,3], key3__exists=True)
 ```
+
+To use the 'or' filter, add '__or' to the end of the key. For example:
+```python
+qobj.filter(key1__or=6, key2__or=True)
+```
+Would return results where 'key1' was '6' or 'key2' was 'True'.
+
 Entering ```qobj.return_filter()``` or ```qobj.print_filter()``` returns or prints the filters used, and it is possible to remove filters by entering:
 ```python
 qobj.remove_filter('<key name>')
