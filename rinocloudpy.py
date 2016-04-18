@@ -132,12 +132,13 @@ class RinoRequests(object):
 
 class Object(RinoRequests):
     # set so that kwargs can be used to set variables.
-    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {}, use_local_metadata=False,  **kwargs):
+    def __init__(self, metadata = {}, file=None, parent = None, tags = None, id=None, __recieved_metadata__ = {}, use_local_metadata=False, _uploaded = False,  **kwargs):
         self.file = file
         self.parent = parent
         self.tags = tags
         self.id = id
         self.metadata = metadata
+        self._uploaded = _uploaded
         self.__recieved_metadata__ = __recieved_metadata__
         self.__dict__.update(metadata)
         self.__dict__.update(kwargs.pop('Obj_from_dict', ''))
@@ -155,19 +156,28 @@ class Object(RinoRequests):
         self.__dict__.update(metadata)
     
     def upload(self):
-        self._prep_metadata_for_sending()
-        response = self.__class__.POST(URI['upload'], _data = {'json': json.dumps(self.metadata)}, _file = {'file': self.file})
-        self._process_returned_metadata(response)
+        if self._uploaded == True:
+            raise Exception('Object has already been uploaded, create a new object or use the update function.')
+            
+        #print '\n pre sending'
+        #print self.__dict__
+        response = self.__class__.POST(URI['upload'], _data = {'json': json.dumps(self._prep_metadata())}, _file = {'file': self.file})
+        #print '\n post sending'
+        #print self.__dict__
+        self._process_recieved_metadata(response)
+        #print '\n after processing'
+        #print self.__dict__
+        self._uploaded = True
                
     def get(self):
         response = self.__class__.POST(URI['get'], _data = {'id': self.id})
-        self._process_returned_metadata(response)
+        self._process_recieved_metadata(response)
 
     def update(self):
-        self._prep_metadata_for_sending()
-        uri = 'files/update_metadata/'
-        response = self.__class__.POST(URI['update'], _data = self.metadata)
-        self._process_returned_metadata(response)
+        data = self._prep_metadata()
+        data['id'] = self.id
+        response = self.__class__.POST(URI['update'], _data = data)
+        self._process_recieved_metadata(response)
  
     def download(self, newname = None):
         local_filename = self._extract_name(newname)
@@ -186,7 +196,6 @@ class Object(RinoRequests):
         localfile.close()
         
     def save_json_local(self, newname = None):
-        self._prep_metadata_for_sending()
         _local_saving_dict = copy.deepcopy(self.__dict__)
         _local_saving_dict.pop('file')
         jsonfile = open(self._extract_name(newname) + '.json', 'w')
@@ -201,26 +210,38 @@ class Object(RinoRequests):
         jf.close()
     
     # -----------------------------------------------------
-    def _prep_metadata_for_sending(self):
-        self.metadata.update(self.__dict__)
-        self.metadata.pop('metadata')
+        
+    def _prep_metadata(self):
+        processing_dict = copy.deepcopy(self.__dict__)
+        processing_dict.pop('_uploaded')
         for key in self.__recieved_metadata__:
             try:
-                self.metadata.pop(key)
+                if self.__recieved_metadata__[key] == self.__dict__[key]:
+                    processing_dict.pop(key)
             except:
                 pass
         try:
-            self.metadata.pop('file')
+            processing_dict.pop('file')
         except:
             pass
         try:
-            self.metadata.pop('__recieved_metadata__')
+            processing_dict.pop('__recieved_metadata__')
         except:
             pass
+        try:
+            processing_dict.pop('metadata')
+        except:
+            pass
+        return processing_dict
+    
+    def _process_recieved_metadata(self, response):
+        loaded_metadata = json_loads_byteified(response._content)
+        if loaded_metadata.has_key('errors'):
+            raise Exception(loaded_metadata['errors'])
+        else:
+            self.__recieved_metadata__.update(loaded_metadata)
+            self.__dict__.update(self.__recieved_metadata__)
         
-    def _process_returned_metadata(self, response):
-        self.__recieved_metadata__.update(json_loads_byteified(response._content))
-        self.__dict__.update(self.__recieved_metadata__)
         
     def _extract_name(self, newname = None):
         try:
