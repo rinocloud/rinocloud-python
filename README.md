@@ -6,7 +6,7 @@ Rinocloudpy is the python integration for Rinocloud. It let you save, upload and
 Need to sort this so people can just ```pip install rinocloudpy ```.
 
 ## Getting started
-### Importing the library and authenication 
+### Importing the library and authenication
 In any script or notebook that uses the rinocloudpy library you need to import the library in enter your API token:
 ```python
 import rinocloudpy as rino
@@ -149,13 +149,13 @@ qobj = rino.Query()
 Next, you can add filters to the query object. Rinocloudpy allows you to filter using the following operators:
 ```
 'lt' - less than,
-'lte' - less than or equal to, 
-'gt' - greater than, 
-'gte' - greater than or equal to, 
-'ne' - not equal to, 
-'in' - in array, 
-'nin' - not in array, 
-'exists' - whether the metadata field exists, 
+'lte' - less than or equal to,
+'gt' - greater than,
+'gte' - greater than or equal to,
+'ne' - not equal to,
+'in' - in array,
+'nin' - not in array,
+'exists' - whether the metadata field exists,
 'or' - allows multiple posibilities to be specified
 ```
 
@@ -168,7 +168,7 @@ It is possible to add multiple filters, so to see only results where 'key2' is n
 qobj.filter(key2__nin=[1,2,3], key3__exists=True)
 ```
 
-To use the 'or' filter, add '__or' to the end of the key. For example:
+To use the 'or' filter, add '\__or' to the end of the key. For example:
 ```python
 qobj.filter(key1__or=6, key2__or=True)
 ```
@@ -216,7 +216,8 @@ will return an object for file in the folder. You can optionally specify that on
 rino.batch.objects_from_folder(<folder path>, file_type='.txt')
 ```
 
+# Development
 
+clone the repo and type
 
-
-
+`python setup.py develop`
