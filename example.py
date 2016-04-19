@@ -1,6 +1,6 @@
 import rinocloud as rino
 
-rino.api_key = "e0687a68dd9568120e3db7e98f26f1c99ef54b81"
+rino.api_key = "<your api key>"
 rino.set_local_path('data/')
 
 r = rino.Object()

@@ -6,8 +6,8 @@
 
 api_key = None
 
-api_domain = 'https://staging.rinocloud.com/'
-# api_domain = 'http://localhost:8000/'
+api_domain = 'https://rinocloud.com/'
+
 api_base = '%s/api/1/' % api_domain
 path = None
 
