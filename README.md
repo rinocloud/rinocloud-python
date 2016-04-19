@@ -3,7 +3,7 @@
 Rinocloudpy is the python integration for Rinocloud. It let you save, upload and query all of your data and metadata. The integration is open source, so you are free to modify it to suit your needs.
 
 ## Installation
-Need to sort this so people can just ```pip install rinocloudpy ```.
+Need to sort this so people can just ```pip install rinocloud ```.
 
 ## Getting started
 ### Importing the library and authenication
@@ -220,4 +220,6 @@ rino.batch.objects_from_folder(<folder path>, file_type='.txt')
 
 clone the repo and type
 
+
+`virtualenv venv --system-site-packages`
 `python setup.py develop`

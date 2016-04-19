@@ -9,11 +9,13 @@ api_base = 'http://staging.rinocloud.com/api/1/'
 # api_base = 'http://localhost:8000/api/1/'
 
 from object import Object
+from query import Query
 import http as http
 
 urls = {
     'upload': api_base + 'files/upload_multipart/',
-    'get': api_base + 'files/get_metadata/',
+    'upload_meta': api_base + 'files/create_object/',
+    'get_metadata': api_base + 'files/get_metadata/',
     'update': api_base + 'files/update_metadata/',
     'download': api_base + 'files/download/?id=',
     'query': api_base + 'files/query/',

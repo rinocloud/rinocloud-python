@@ -1,14 +1,15 @@
+import rinocloud
 
 
-
-class Query(RinoRequests):
-    def __init__(self, dictionary={}, results={'results': 'The query method has not yet been called.'}):
-        self.dictionary = dictionary
-        self.results = results
+class Query():
 
     OPERATORS = [
         'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or'
     ]
+
+    def __init__(self, dictionary={}, results='The query method has not yet been called.'):
+        self.dictionary = dictionary
+        self.results = results
 
     @classmethod
     def extract_filter_operator(cls, parameter):
@@ -51,10 +52,8 @@ class Query(RinoRequests):
         else:
             self.dictionary.pop(key)
 
-    def query(self):
-        response = self.__class__.POST(URI['query'], _json={'query': self.dictionary})
-        reply = json_loads_byteified(response._content)
-        self.results = []
-        for obj in reply['result']:
-            self.results.append(Object(Obj_from_dict=obj))
-        return self.results
+    def query(self, **kw):
+        r = rinocloud.http.query(self.dictionary)
+        assert r.status_code == 200, "Query failed: %s" % r.text
+        reply = r.json()["result"]
+        return [rinocloud.Object()._process_returned_metadata(item, **kw) for item in reply]

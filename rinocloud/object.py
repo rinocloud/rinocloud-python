@@ -1,5 +1,6 @@
 import json
 import os
+from clint.textui import progress
 import rinocloud
 
 
@@ -13,6 +14,7 @@ class Object():
         self.id = None
         self.created_on = None
         self.updated_on = None
+        self._cloud_name = None
         self.name = None
 
         # these are some variables we will keep hidden, marked with underscore
@@ -79,21 +81,6 @@ class Object():
         self.filepath = os.path.join(self._path, self.increment_name(name, i))
         return self.name
 
-    def _prep_metadata(self):
-        # copy the self.__dict__ and delete all that start with _
-        obj = self.__dict__.copy()
-        [obj.pop(item) for item in obj.keys() if item.startswith('_')]
-        obj.pop('filepath')
-        return obj
-
-    def save_json(self):
-        """
-            save all the exposed variables to a json file
-        """
-        # save to the set local path and add .json
-        with open(self.filepath + '.json', 'w+') as outfile:
-            json.dump(self._prep_metadata(), outfile, indent=4)
-
     def set_local_path(self, directory, create_dir=False):
         """
             sets path for local saving of information
@@ -105,20 +92,76 @@ class Object():
         if os.path.isdir(directory):
             self._path = directory
 
-    def upload(self):
-        meta = self._prep_metadata()
-        r = rinocloud.http.upload(self.filepath, meta)
-        assert r.status_code == 201, "Upload failed:\n%s" % r.text
-        self._process_returned_metadata(r.json())
+    def _prep_metadata(self):
+        # copy the self.__dict__ and delete all that start with _
+        obj = self.__dict__.copy()
+        [obj.pop(item) for item in obj.keys() if item.startswith('_')]
+        obj.pop('filepath')
+        return obj
 
-    def _process_returned_metadata(self, response_metadata):
+    def _process_returned_metadata(self, response_metadata, **kw):
         self.__dict__.update(response_metadata["metadata"])
 
         self.id = response_metadata["id"]
         self.created_on = response_metadata["created_on"]
         self.updated_on = response_metadata["updated_on"]
-        self.name = response_metadata["name"]
+        self._cloud_name = response_metadata["name"]
+        self._rino_type = response_metadata["type"]
+
+        if self.name is None:
+            self.set_name(response_metadata["name"], **kw)
 
         # these are some variables we will keep hidden, marked with underscore
         self._size = response_metadata["size"]
         self._parent = response_metadata["parent"]
+
+        return self
+
+    def save_local_metadata(self):
+        """
+            save all the exposed variables to a json file
+        """
+        # save to the set local path and add .json
+        with open(self.filepath + '.json', 'w+') as outfile:
+            json.dump(self._prep_metadata(), outfile, indent=4)
+
+    def upload(self):
+        meta = self._prep_metadata()
+        meta["parent"] = self._parent
+
+        r = rinocloud.http.upload(self.filepath, meta)
+        assert r.status_code == 201, "Upload failed:\n%s" % r.text
+        self._process_returned_metadata(r.json())
+
+    def upload_meta(self):
+        meta = self._prep_metadata()
+        meta["parent"] = self._parent
+        r = rinocloud.http.upload_meta(meta)
+        assert r.status_code == 201, "Upload failed:\n%s" % r.text
+        self._process_returned_metadata(r.json())
+
+    def update(self):
+        meta = self._prep_metadata()
+        meta["parent"] = self._parent
+        r = rinocloud.http.upload_meta(meta)
+        assert r.status_code == 201, "Upload failed:\n%s" % r.text
+        self._process_returned_metadata(r.json())
+
+    def get(self, id, **kw):
+        r = rinocloud.http.get_metadata(id)
+        assert r.status_code != 404, "Object does not exist in Rinocloud. Error 404."
+        self._process_returned_metadata(r.json(), **kw)
+
+    def download(self):
+        assert self.id is not None, "Need to have id set to download data."
+        assert self._rino_type == "file", "Target object is not a file, its a folder or empty object."
+
+        r = rinocloud.http.download(self.id)
+
+        with open(self.filepath, 'wb') as f:
+            total_length = self._size
+            for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length / 1024) + 1):
+                if chunk:
+                    f.write(chunk)
+                    f.flush()
+        return self.filepath
