@@ -1,27 +1,31 @@
 # Rinocloud bindings for python
 
-This is the python integration for Rinocloud. It lets you save, upload and query all of your data and metadata. The integration is open source (MIT License), so you are free to modify it to suit your needs.
+This is the python integration for Rinocloud. It lets you save, upload and query all of your data and metadata. 
+
+The integration is open source (MIT License), so you are free to modify it to suit your needs.
 
 ## Installation
-Need to sort this so people can just ```pip install rinocloud ```.
+
+```pip install rinocloud ```
 
 ## Getting started
 
 ### Importing the library and authentication
 
-In any script or notebook that uses the rinocloud library you need to import the library in enter your API token:
-
 ```python
 import rinocloud as rino
+
 rino.api_key = '<Your API Token Here>'
 ```
 
-## Rinocloud Objects
 ### Creating an object
+
 The Rinocloud library works uses objects to store the metadata associated with a file. To create an object called 'obj', enter:
+
 ```python
 obj = rino.Object()
 ```
+
 ### Associating a file with an object
 You can associate file with an object by passing the object a file pointer on creation:
 ```
