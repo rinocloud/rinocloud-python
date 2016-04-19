@@ -5,12 +5,17 @@
 # Eoin Murray <eoin@rinocloud.com>
 
 api_key = None
-api_base = 'http://staging.rinocloud.com/api/1/'
-# api_base = 'http://localhost:8000/api/1/'
 
+api_domain = 'https://staging.rinocloud.com/'
+# api_domain = 'http://localhost:8000/'
+api_base = '%s/api/1/' % api_domain
+path = None
+
+from config import *
 from object import Object
 from query import Query
 import http as http
+
 
 urls = {
     'upload': api_base + 'files/upload_multipart/',

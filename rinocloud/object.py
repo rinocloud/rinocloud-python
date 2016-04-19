@@ -1,6 +1,5 @@
 import json
 import os
-from clint.textui import progress
 import rinocloud
 
 
@@ -23,7 +22,7 @@ class Object():
 
         # this needs to be set by the user in order to save locally
         # they just call self.set_local_path
-        self._path = ''
+        self._path = rinocloud.path
         self.filepath = ''
 
         # lets set all the passed kwargs to this object
@@ -156,12 +155,6 @@ class Object():
         assert self.id is not None, "Need to have id set to download data."
         assert self._rino_type == "file", "Target object is not a file, its a folder or empty object."
 
-        r = rinocloud.http.download(self.id)
-
-        with open(self.filepath, 'wb') as f:
-            total_length = self._size
-            for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length / 1024) + 1):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
+        r = rinocloud.http.download(self.id, self.filepath, self._size)
+        assert r.status_code == 200, "Download error occured: %s" % r.text
         return self.filepath

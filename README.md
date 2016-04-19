@@ -1,20 +1,24 @@
-# Using Rinocloud with python
+# Rinocloud bindings for python
 
-Rinocloudpy is the python integration for Rinocloud. It let you save, upload and query all of your data and metadata. The integration is open source, so you are free to modify it to suit your needs.
+This is the python integration for Rinocloud. It lets you save, upload and query all of your data and metadata. The integration is open source (MIT License), so you are free to modify it to suit your needs.
 
 ## Installation
 Need to sort this so people can just ```pip install rinocloud ```.
 
 ## Getting started
-### Importing the library and authenication
-In any script or notebook that uses the rinocloudpy library you need to import the library in enter your API token:
+
+### Importing the library and authentication
+
+In any script or notebook that uses the rinocloud library you need to import the library in enter your API token:
+
 ```python
-import rinocloudpy as rino
-rino.authenticate('<Your API Token Here>')
+import rinocloud as rino
+rino.api_key = '<Your API Token Here>'
 ```
-## Rinocloudpy Objects
+
+## Rinocloud Objects
 ### Creating an object
-The Rinocloudpy library works uses objects to store the metadata associated with a file. To create an object called 'obj', enter:
+The Rinocloud library works uses objects to store the metadata associated with a file. To create an object called 'obj', enter:
 ```python
 obj = rino.Object()
 ```
@@ -119,7 +123,7 @@ obj.download('<new file name>')
 ```
 
 #Local operation
-Rinocloudpy objects can also save data and metadata locally. To save a file locally (provided that the file pointer has been specified), enter:
+Rinocloud objects can also save data and metadata locally. To save a file locally (provided that the file pointer has been specified), enter:
 ```python
 obj.save_local()
 ```
@@ -139,14 +143,14 @@ obj.get_from_json_local(<'json filename'>)
 ```
 
 # Querying
-Rinocloudpy also contains tools for querying. You can query any and multiple metadata fields of all objects saved to Rinocloud.
+Rinocloud also contains tools for querying. You can query any and multiple metadata fields of all objects saved to Rinocloud.
 ## Creating a query object
 To make a query, you must create a query object:
 ```python
 qobj = rino.Query()
 ```
 ## Adding filters
-Next, you can add filters to the query object. Rinocloudpy allows you to filter using the following operators:
+Next, you can add filters to the query object. Rinocloud allows you to filter using the following operators:
 ```
 'lt' - less than,
 'lte' - less than or equal to,
@@ -190,7 +194,7 @@ Once the filters are specified, the query is made by entering:
 qobj.query()
 ```
 more filters can be added and the query can be made again if needed.
-Making a query returns a list of Rinocloudpy objects. The objects contain all the metadata associated with the file from Rinocloud and can be intereacted with individually or by using the batch operations.
+Making a query returns a list of Rinocloud objects. The objects contain all the metadata associated with the file from Rinocloud and can be intereacted with individually or by using the batch operations.
 # Batch operations
 Batch operations are designed to streamline working with multiple objects. You can perform the download, upload, add, get and update methods on a list of objects using:
 ```python

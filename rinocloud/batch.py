@@ -6,13 +6,17 @@ class Batch():
             obj.download()
 
     @staticmethod
-    def upload(obj_list):
+    def upload(obj_list, to=None):
         for obj in obj_list:
+            if to is not None:
+                obj._parent = to
             obj.upload()
 
     @staticmethod
-    def upload_meta(obj_list):
+    def upload_meta(obj_list, to=None):
         for obj in obj_list:
+            if to is not None:
+                obj._parent = to
             obj.upload_meta()
 
     @staticmethod
