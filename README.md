@@ -91,7 +91,7 @@ q.filter(x="A22", y__gt=2.2)
 list_of_objects = q.query()
 ```
 
-There are a lot of query types have a look at the [documentation](#Querying) for more
+There are a lot of query types have a look at the [documentation](#querying) for more
 
 ## Documentation
 
