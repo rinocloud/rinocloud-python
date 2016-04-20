@@ -29,6 +29,9 @@ class Object():
         for key, value in kw.iteritems():
             setattr(self, key, value)
 
+    def __repr__(self):
+        return "<rinocloud.Object %s id=%s>" % (self.name, self.id)
+
     def increment_name(self, name, i):
         """
         takes something like

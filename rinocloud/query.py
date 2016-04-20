@@ -4,12 +4,15 @@ import rinocloud
 class Query():
 
     OPERATORS = [
-        'eq', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or'
+        'eq', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or', 'string_contains'
     ]
 
-    def __init__(self, dictionary={}, results='The query method has not yet been called.'):
-        self.dictionary = dictionary
+    def __init__(self, query_dict={}, results='The query method has not yet been called.'):
+        self.query_dict = query_dict
         self.results = results
+
+    def __repr__(self):
+        return "<rinocloud.Query>"
 
     @classmethod
     def extract_filter_operator(cls, parameter):
@@ -23,37 +26,25 @@ class Query():
         for name, value in kw.items():
             attr, operator = Query.extract_filter_operator(name)
             if operator is None:
-                self.dictionary[attr] = value
+                self.query_dict[attr] = value
             elif operator is 'or':
                 option_list = []
-                if '$or' in self.dictionary:
-                    option_list = self.dictionary['$or']
+                if '$or' in self.query_dict:
+                    option_list = self.query_dict['$or']
                     option_list.append({attr: value})
-                    self.dictionary['$' + operator] = option_list
+                    self.query_dict['$' + operator] = option_list
                 else:
                     option_list.append({attr: value})
-                    self.dictionary['$' + operator] = option_list
+                    self.query_dict['$' + operator] = option_list
             else:
-                if attr in self.dictionary:
-                    self.dictionary[attr]['$' + operator] = value
+                if attr in self.query_dict:
+                    self.query_dict[attr]['$' + operator] = value
                 else:
-                    self.dictionary[attr] = {'$' + operator: value}
+                    self.query_dict[attr] = {'$' + operator: value}
         return self
 
-    def print_filter(self):
-        print self.dictionary
-
-    def return_filter(self):
-        return self.dictionary
-
-    def remove_filter(self, key=None):
-        if key is None:
-            self.dictionary = {}
-        else:
-            self.dictionary.pop(key)
-
     def query(self, **kw):
-        r = rinocloud.http.query(self.dictionary)
+        r = rinocloud.http.query(self.query_dict)
         assert r.status_code == 200, "Query failed: %s" % r.text
         reply = r.json()["result"]
         return [rinocloud.Object()._process_response_metadata(item, **kw) for item in reply]

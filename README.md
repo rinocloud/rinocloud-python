@@ -246,6 +246,8 @@ list_of_objects = rinocloud.Query().filter(x=3).query()
 You can add filters to the query object. Rinocloud allows you to filter using the following operators:
 
 ```
+'eq' - equal to,
+'neq' - not equal to,
 'lt' - less than,
 'lte' - less than or equal to,
 'gt' - greater than,
@@ -254,6 +256,7 @@ You can add filters to the query object. Rinocloud allows you to filter using th
 'in' - in array,
 'nin' - not in array,
 'exists' - whether the metadata field exists,
+'string_contains' - checks if the name or notes field contains a certain substring.
 'or' - allows multiple possibilities to be specified
 ```
 
@@ -277,7 +280,7 @@ rinocloud.Query().filter(key1__or=6, key2__or=True)
 
 Would return results where 'key1' was '6' or 'key2' was 'True'.
 
-You can also access sub objects, say the metadata of some file looked like this:
+You can also access sub-objects. Suppose the metadata of some file looked like this:
 
 ```
 {
@@ -290,7 +293,7 @@ You can also access sub objects, say the metadata of some file looked like this:
 you could search for this by using
 
 ```python
-rinocloud.Query().filter(x__y=3)
+rinocloud.Query().filter(x__y__eq=3)
 ```
 
 ## Making the query

@@ -4,3 +4,5 @@ data/
 venv/
 rinocloud.egg-info
 dist
+
+error.html
