@@ -3,6 +3,8 @@
 Rinocloud python is an easy way to organise scientific datasets in python.
 The library is open source (MIT License), so you are free to modify it to suit your needs.
 
+Typically when doing simulations/experiments/modelling you have a bunch of parameters, which we call metadata, and an actual dataset, which is big list of numbers. This library aims to make taking care of the metadata and dataset easy.
+
 - [Installation](#installation)
 - [Examples](#examples)
 - [Documentation](#documentation)
