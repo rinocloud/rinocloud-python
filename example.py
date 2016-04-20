@@ -1,23 +1,16 @@
+
 import rinocloud as rino
 
-rino.api_key = "<your api key>"
-rino.set_local_path('data/')
+rino.set_domain('http://localhost:8000')
+rino.api_key = "651ae65b9d5106e53106fbb7f525218b7b2e1456"
 
-r = rino.Object()
-r.set_name("file.txt")
+# r = rino.Object()
+# r.set_name("query_test")
+# r.x = {'y': 2}
+# r.upload_meta()
 
-r.slope = 2
-r.constant = 3
+q = rino.Query()
 
-# variables beginning with underscores are not saved, making it handy to attach all related
-# data to the one object.
-r._x = range(10)
-# y = slope * x + constant
-r._y = [i * r.slope + r.constant for i in r._x]
-
-with open(r.filepath, 'w') as outfile:
-    for (i, j) in zip(r._x, r._y):
-        outfile.write("%1.2lf, %1.2lf\n" % (i, j))
-
-r.save_local_metadata()
-r.upload()
+q.filter(x=4)
+q.print_filter()
+print q.query()

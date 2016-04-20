@@ -4,7 +4,7 @@ import rinocloud
 class Query():
 
     OPERATORS = [
-        'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or'
+        'eq', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or'
     ]
 
     def __init__(self, dictionary={}, results='The query method has not yet been called.'):
@@ -56,4 +56,4 @@ class Query():
         r = rinocloud.http.query(self.dictionary)
         assert r.status_code == 200, "Query failed: %s" % r.text
         reply = r.json()["result"]
-        return [rinocloud.Object()._process_returned_metadata(item, **kw) for item in reply]
+        return [rinocloud.Object()._process_response_metadata(item, **kw) for item in reply]

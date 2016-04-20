@@ -53,8 +53,10 @@ class Object():
             path - folder path to save the file too
             create_dir - whether to create the directory if it doesnt exist.
         """
-        if path is not None:
-            self.set_local_path(path, create_dir)
+
+        self._path = rinocloud.path
+        # if path is not None:
+        #   self.set_local_path(path, create_dir)
 
         # check if the file exists
         exists = os.path.exists(os.path.join(self._path, self.increment_name(name, 0)))
@@ -98,7 +100,7 @@ class Object():
         obj.pop('filepath')
         return obj
 
-    def _process_returned_metadata(self, response_metadata, **kw):
+    def _process_response_metadata(self, response_metadata, **kw):
         self.__dict__.update(response_metadata["metadata"])
 
         self.id = response_metadata["id"]
@@ -124,32 +126,44 @@ class Object():
         with open(self.filepath + '.json', 'w+') as outfile:
             json.dump(self._prep_metadata(), outfile, indent=4)
 
+    def import_local_metadata(self):
+        with open(self.filepath + '.json', 'r') as infile:
+            meta = json.loads(infile.read())
+            self.__dict__.update(meta)
+
     def upload(self):
         meta = self._prep_metadata()
         meta["parent"] = self._parent
 
         r = rinocloud.http.upload(self.filepath, meta)
         assert r.status_code == 201, "Upload failed:\n%s" % r.text
-        self._process_returned_metadata(r.json())
+        self._process_response_metadata(r.json())
 
     def upload_meta(self):
         meta = self._prep_metadata()
         meta["parent"] = self._parent
         r = rinocloud.http.upload_meta(meta)
         assert r.status_code == 201, "Upload failed:\n%s" % r.text
-        self._process_returned_metadata(r.json())
+        self._process_response_metadata(r.json())
 
     def update(self):
         meta = self._prep_metadata()
         meta["parent"] = self._parent
         r = rinocloud.http.upload_meta(meta)
         assert r.status_code == 201, "Upload failed:\n%s" % r.text
-        self._process_returned_metadata(r.json())
+        self._process_response_metadata(r.json())
 
-    def get(self, id, **kw):
-        r = rinocloud.http.get_metadata(id)
+    def get(self, id=None, **kw):
+        _id = id
+        if _id is None:
+            if self.id is None:
+                raise AttributeError("Can't fetch without an id. Need to either set Object.id or pass id to get.")
+            else:
+                _id = self.id
+
+        r = rinocloud.http.get_metadata(_id)
         assert r.status_code != 404, "Object does not exist in Rinocloud. Error 404."
-        self._process_returned_metadata(r.json(), **kw)
+        self._process_response_metadata(r.json(), **kw)
 
     def download(self):
         assert self.id is not None, "Need to have id set to download data."
