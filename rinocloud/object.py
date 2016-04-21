@@ -30,7 +30,7 @@ class Object():
             setattr(self, key, value)
 
     def __repr__(self):
-        return "<rinocloud.Object %s id=%s>" % (self.name, self.id)
+        return "<rinocloud.Object name=%s id=%s>" % (self.name, self.id)
 
     def increment_name(self, name, i):
         """
@@ -156,7 +156,7 @@ class Object():
         assert r.status_code == 201, "Upload failed:\n%s" % r.text
         self._process_response_metadata(r.json())
 
-    def get(self, id=None, **kw):
+    def get(self, id=None, truncate_metadata=True, **kw):
         _id = id
         if _id is None:
             if self.id is None:
@@ -164,7 +164,7 @@ class Object():
             else:
                 _id = self.id
 
-        r = rinocloud.http.get_metadata(_id)
+        r = rinocloud.http.get_metadata(_id, truncate_metadata=True)
         assert r.status_code != 404, "Object does not exist in Rinocloud. Error 404."
         self._process_response_metadata(r.json(), **kw)
 

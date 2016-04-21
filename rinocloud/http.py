@@ -41,13 +41,13 @@ def upload_meta(meta):
     return requests.post(rinocloud.urls["upload_meta"], json=meta, headers=headers)
 
 
-def get_metadata(_id):
+def get_metadata(_id, truncate_metadata=True):
     headers = {
         'Authorization': 'Token %s' % rinocloud.api_key,
         'X-Requested-With': 'XMLHttpRequest'
     }
 
-    return requests.post(rinocloud.urls["get_metadata"], json={'id': _id}, headers=headers)
+    return requests.post(rinocloud.urls["get_metadata"], json={'id': _id, 'truncate_metadata': truncate_metadata}, headers=headers)
 
 
 def download(_id, filepath, size):
@@ -65,10 +65,26 @@ def download(_id, filepath, size):
     return r
 
 
-def query(query):
+def query(query, truncate_metadata=True, limit=20, offset=0):
     headers = {
         'Authorization': 'Token %s' % rinocloud.api_key,
         'X-Requested-With': 'XMLHttpRequest'
     }
 
-    return requests.post(rinocloud.urls["query"], json={'query': query}, headers=headers)
+    payload = {
+        'query': query,
+        'truncate_metadata': truncate_metadata,
+        'limit': limit,
+        'offset': offset
+    }
+
+    return requests.post(rinocloud.urls["query"], json=payload, headers=headers)
+
+
+def count(query):
+    headers = {
+        'Authorization': 'Token %s' % rinocloud.api_key,
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+
+    return requests.post(rinocloud.urls["count"], json={'query': query}, headers=headers)

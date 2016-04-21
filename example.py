@@ -1,9 +1,18 @@
 
-import rinocloud as rino
+import rinocloud
 
-rino.set_domain('http://localhost:8000')
-rino.api_key = "651ae65b9d5106e53106fbb7f525218b7b2e1456"
+rinocloud.api_key = "<your api key>"
 
-q = rino.Query()
+# Saving objects
+o = rinocloud.Object()
+o.set_name("test")
+o.x = 4
 
-print q.query()
+with open(o.filepath, 'w') as outfile:
+    outfile.write('some information')
+
+o.save_local_metadata()  # saves everything locally
+o.upload()  # backs up to Rinocloud, allows querying
+
+# Querying
+print rinocloud.Query().filter(x__eq=4).query()

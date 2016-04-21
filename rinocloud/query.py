@@ -43,8 +43,13 @@ class Query():
                     self.query_dict[attr] = {'$' + operator: value}
         return self
 
-    def query(self, **kw):
-        r = rinocloud.http.query(self.query_dict)
+    def query(self, truncate_metadata=True, limit=20, offset=0, **kw):
+        r = rinocloud.http.query(self.query_dict, truncate_metadata, limit, offset)
         assert r.status_code == 200, "Query failed: %s" % r.text
         reply = r.json()["result"]
         return [rinocloud.Object()._process_response_metadata(item, **kw) for item in reply]
+
+    def count(self, **kw):
+        r = rinocloud.http.count(self.query_dict)
+        assert r.status_code == 200, "Query failed: %s" % r.text
+        return r.json()["count"]

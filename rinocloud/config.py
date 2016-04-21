@@ -34,6 +34,7 @@ def set_rinocloud_urls():
         'update': rinocloud.api_base + 'files/update_metadata/',
         'download': rinocloud.api_base + 'files/download/?id=',
         'query': rinocloud.api_base + 'files/query/',
+        'count': rinocloud.api_base + 'files/query_count/',
         'sign_s3': rinocloud.api_base + 'files/sign_s3/',
         'pre_s3_upload': rinocloud.api_base + 'files/pre_s3_upload/',
         'post_s3_upload': rinocloud.api_base + 'files/post_s3_upload/',

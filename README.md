@@ -212,14 +212,18 @@ Provided that tho object ID is specified, you can download the file from Rinoclo
 ```python
 obj.download()
 ```
+
 The downloaded file can be renamed by passing a new file name to the download method:
+
 ```python
 r = rino.Object(id=3397)
-r.get()
+r.get([truncate_metadata=True])
 r.download()
 
 >>> [====================       ] 544/785 -- 00:32:45
 ```
+
+When getting an object, if the metadata is really large, and you dont need to download it - use `truncate_metadata` and it will truncate the metadata into a small string if its over 300kB.
 
 It will download as whatever the filename is in Rinocloud, or it will increment the filename if a local file already exists.
 
@@ -301,12 +305,22 @@ rinocloud.Query().filter(x__y__eq=3)
 Once the filters are specified, the query is made by entering:
 
 ```python
-rinocloud.Query().query()
+rinocloud.Query().filter(<your filter args>).query([truncate_metadata=True, limit=20, offset=0])
 ```
 
-more filters can be added and the query can be made again if needed.
+- If `truncate_metadata` is True then objects with more than 300kB of metadata information will have the metadata information.
+- `limit` is a maximum on how many objects you want returned.
+- `offset` is from which index of the results limit will start. Can be used for pagination of results.
 
-Making a query returns a list of Rinocloud objects.
+More filters can be added and the query can be made again if needed. Making a query returns a list of Rinocloud objects.
+
+## Count
+
+You count to see how many objects match a query.
+
+```python
+rinocloud.Query().filter(<your filter args>).count()
+```
 
 # Batch operations
 Batch operations are designed to streamline working with multiple objects. You can perform the download, upload, add, get and update methods on a list of objects using:

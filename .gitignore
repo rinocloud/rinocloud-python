@@ -2,7 +2,9 @@
 .ipynb_checkpoints/
 data/
 venv/
-rinocloud.egg-info
-dist
-
+/rinocloud.egg-info
+/build
+/dist
+/MANIFEST
 error.html
+scratch.py
