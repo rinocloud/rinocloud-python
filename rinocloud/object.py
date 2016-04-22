@@ -99,7 +99,7 @@ class Object():
     def _prep_metadata(self):
         # copy the self.__dict__ and delete all that start with _
         obj = self.__dict__.copy()
-        [obj.pop(item) for item in obj.keys() if item.startswith('_')]
+        [obj.pop(item) for item in list(obj.keys()) if item.startswith('_')]
         obj.pop('filepath')
         return obj
 
