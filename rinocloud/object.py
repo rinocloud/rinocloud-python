@@ -26,7 +26,7 @@ class Object():
         self.filepath = ''
 
         # lets set all the passed kwargs to this object
-        for key, value in kw.iteritems():
+        for key, value in kw.items():
             setattr(self, key, value)
 
     def __repr__(self):
