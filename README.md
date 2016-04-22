@@ -10,6 +10,9 @@ Typically when doing simulations/experiments/modelling you have a bunch of param
 - [Documentation](#documentation)
 - [Development](#development)
 
+So far the library has only been tested/developed on Python2.7, we will add proper Python3 support soon.
+Although it might work since https://github.com/rinocloud/rinocloud-python/pull/8 from [tdaff](https://github.com/tdaff).
+
 ## Installation
 
 ```pip install rinocloud ```
