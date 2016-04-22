@@ -10,10 +10,10 @@ api_base = '%s/api/1/' % api_domain
 
 path = ''
 
-from config import *
-from object import Object
-from query import Query
-from batch import Batch
-import http as http
+from .config import *
+from .object import Object
+from .query import Query
+from .batch import Batch
+from . import http
 
 set_rinocloud_urls()
