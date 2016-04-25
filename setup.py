@@ -10,6 +10,8 @@ setup(
     download_url='https://github.com/rinocloud/rinocloud-python/tarball/0.1',  # I'll explain this in a second
     keywords=['rinocloud', 'data', 'api'],  # arbitrary keywords
     classifiers=[],
+    test_suite='rinocloud.test.all',
+    tests_require=['mock'],
     install_requires=[
         "requests",
         "requests_toolbelt",

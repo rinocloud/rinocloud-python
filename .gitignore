@@ -8,3 +8,5 @@ venv/
 /MANIFEST
 error.html
 scratch.py
+.tox/
+.eggs/

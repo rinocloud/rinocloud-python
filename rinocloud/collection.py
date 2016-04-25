@@ -11,7 +11,7 @@ class Collection(rinocloud.Object):
         self.objects = objs or []
         self.id = None
 
-    def set_name(self, name, overwrite=False, increment=True, create_dir=False):
+    def set_name(self, name, create_dir=False):
         """
         Sets the name of the file to be saved.
 
@@ -22,35 +22,13 @@ class Collection(rinocloud.Object):
         """
 
         # check if the file exists
-        exists = os.path.exists(os.path.join(self._path, self.increment_name(name, 0)))
+        exists = os.path.exists(os.path.join(self._path, name))
 
+        self.filepath = os.path.join(self._path, name)
         if exists is False and create_dir is True:
-            self.filepath = os.path.join(self._path, self.increment_name(name, 0))
             os.makedirs(self.filepath)
 
-        # make sure that we dont overwrite if overwrite and increment are both false
-        warning = "Filename and path already exists, refusing to set filename without overwrite=True or increment=True"
-        assert not (exists and not overwrite and not increment), warning
-
-        if overwrite is True:
-            increment = False
-
-        # otherwise overwrite the file
-        if increment is False:
-            self.filepath = os.path.join(self._path, self.increment_name(name, 0))
-            self.name = self.increment_name(name, 0)
-            return self.name
-
-        # or increment the filename
-        i = 0
-        while os.path.exists(os.path.join(self._path, self.increment_name(name, i))):
-            i += 1
-        self.name = self.increment_name(name, i)
-        self.filepath = os.path.join(self._path, self.increment_name(name, i))
-
-        if not os.path.exists(self.filepath) and create_dir is False:
-            raise AttributeError("Path '%s' does not exist, to make it pass create_dir=True to rinocloud.set_local_path" % self.filepath)
-
+        self.name = name
         return self.name
 
     def _prep_metadata(self):
