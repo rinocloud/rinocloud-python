@@ -96,6 +96,33 @@ q.filter(x="A22", y__gt=2.2)
 list_of_objects = q.query()
 ```
 
+### Using collections of objects
+
+```python
+c = rinocloud.Collection()
+c.set_name("folder", create_dir=True)
+
+o1 = rinocloud.Object()
+o1.set_name("a.txt")
+
+o2 = rinocloud.Object()
+o2.set_name("b.txt")
+
+c.add([o1, o2])
+
+# collections can have queryable metadata too
+c.x = 3
+c.sample_id = "A3303"
+
+with open(o1.filepath, 'w') as out:
+    out.write('1\n2\n3')
+
+with open(o2.filepath, 'w') as out:
+    out.write('1\n2\n3')
+
+c.upload()
+```
+
 There are a lot of query types have a look at the [documentation](#querying) for more
 
 ## Documentation
@@ -224,6 +251,46 @@ r.get([truncate_metadata=True])
 r.download()
 
 >>> [====================       ] 544/785 -- 00:32:45
+```
+
+## Collections
+
+You can add a bunch of objects to a collection, and upload them all at the same time, in the Rinocloud Web UI - the collection 
+will be turned into a folder with child files
+
+```python
+c = rinocloud.Collection()
+c.set_name("folder", create_dir=True)
+
+o1 = rinocloud.Object()
+o1.set_name("a.txt")
+
+o2 = rinocloud.Object()
+o2.set_name("b.txt")
+
+c.add([o1, o2])
+c.upload()
+```
+
+## Collection metadata
+
+Collections have fully queryable metadata
+
+```python
+c = rinocloud.Collection()
+c.set_name("folder")
+
+c.x = 4
+c.sample_id = "A3303"
+
+c.upload()
+```
+
+## Iterating over a collection
+
+```python
+for obj in collection:
+    print obj
 ```
 
 When getting an object, if the metadata is really large, and you dont need to download it - use `truncate_metadata` and it will truncate the metadata into a small string if its over 300kB.
