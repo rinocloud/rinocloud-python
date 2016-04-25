@@ -1,7 +1,7 @@
 from setuptools import setup
 setup(
     name="rinocloud",
-    version="0.0.2",
+    version="0.0.4",
     packages=["rinocloud"],
     description='Rinocloud python bindings',
     author='Eoin Murray',

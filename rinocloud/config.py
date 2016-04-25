@@ -21,6 +21,9 @@ def set_local_path(directory, create_dir=False):
 
 
 def set_domain(url):
+    if url.endswith('/'):
+        url = url[:-1]
+
     rinocloud.api_domain = url
     rinocloud.api_base = '%s/api/1/' % rinocloud.api_domain
     set_rinocloud_urls()
