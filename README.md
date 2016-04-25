@@ -9,6 +9,7 @@ Typically when doing simulations/experiments/modelling you have a bunch of param
 - [Examples](#examples)
 - [Documentation](#documentation)
 - [Development](#development)
+- [Testing](#testing)
 
 So far the library has only been tested/developed on Python2.7, we will add proper Python3 support soon.
 
@@ -255,7 +256,7 @@ r.download()
 
 ## Collections
 
-You can add a bunch of objects to a collection, and upload them all at the same time, in the Rinocloud Web UI - the collection 
+You can add a bunch of objects to a collection, and upload them all at the same time, in the Rinocloud Web UI - the collection
 will be turned into a folder with child files
 
 ```python
@@ -409,3 +410,26 @@ Clone the repo and type:
 `python setup.py develop`
 
 This will install the package into a directory for development.
+
+## Testing
+
+We have basic tests working now for python2.7 and python3.5.
+
+To run the tests in either interpreter just use
+
+```python
+python setup.py test
+```
+
+or, if python 3 is named `python3`
+
+```python
+python3 setup.py test
+```
+
+If you have both 2.7 and 3.5 installed, you can use [tox](https://pypi.python.org/pypi/tox) (install with `pip install tox`)
+Then just type inside this repo.
+
+```
+tox
+```
