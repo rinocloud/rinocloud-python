@@ -41,6 +41,15 @@ def upload_meta(meta):
     return requests.post(rinocloud.urls["upload_meta"], json=meta, headers=headers)
 
 
+def create_folder(meta):
+    headers = {
+        'Authorization': 'Token %s' % rinocloud.api_key,
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+
+    return requests.post(rinocloud.urls["create_folder"], json=meta, headers=headers)
+
+
 def get_metadata(_id, truncate_metadata=True):
     headers = {
         'Authorization': 'Token %s' % rinocloud.api_key,

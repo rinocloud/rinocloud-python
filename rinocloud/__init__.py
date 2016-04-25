@@ -12,6 +12,7 @@ path = ''
 
 from .config import *
 from .object import Object
+from .collection import Collection
 from .query import Query
 from .batch import Batch
 from . import http

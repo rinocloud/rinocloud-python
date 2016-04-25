@@ -30,6 +30,7 @@ def set_rinocloud_urls():
     rinocloud.urls = {
         'upload': rinocloud.api_base + 'files/upload_multipart/',
         'upload_meta': rinocloud.api_base + 'files/create_object/',
+        'create_folder': rinocloud.api_base + 'files/create_folder/',
         'get_metadata': rinocloud.api_base + 'files/get_metadata/',
         'update': rinocloud.api_base + 'files/update_metadata/',
         'download': rinocloud.api_base + 'files/download/?id=',

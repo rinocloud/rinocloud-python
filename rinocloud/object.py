@@ -3,7 +3,7 @@ import os
 import rinocloud
 
 
-class Object():
+class Object(object):
 
     def __init__(self, **kw):
         """
@@ -32,6 +32,33 @@ class Object():
     def __repr__(self):
         return "<rinocloud.Object name=%s id=%s>" % (self.name, self.id)
 
+    def items(self):
+        return self._prep_metadata().items()
+
+    def iteritems(self):
+        return self._prep_metadata().items()
+
+    def keys(self):
+        return self._prep_metadata().keys()
+
+    def values(self):
+        return self._prep_metadata().values()
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+    def __delitem__(self, key):
+        del self.__dict__[key]
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def __len__(self):
+        return len(self.__dict__)
+
     def increment_name(self, name, i):
         """
         takes something like
@@ -41,11 +68,14 @@ class Object():
         """
         if i == 0:
             return name
-        split = name.split('.')
-        split[-2] = split[-2] + str(i)
-        return '.'.join(split)
+        if '.' in name:
+            split = name.split('.')
+            split[-2] = split[-2] + str(i)
+            return '.'.join(split)
+        else:
+            return name + str(i)
 
-    def set_name(self, name, overwrite=False, increment=True, path=None, create_dir=False):
+    def set_name(self, name, overwrite=False, increment=True):
         """
         Sets the name of the file to be saved.
 
@@ -53,13 +83,7 @@ class Object():
             name - the name to the file
             increment - whether or not to increment the filename if there is an existing file ie test.txt => test1.txt
             overwrite - whether or not to overwrite existing local file, renders increment redundant
-            path - folder path to save the file too
-            create_dir - whether to create the directory if it doesnt exist.
         """
-
-        self._path = rinocloud.path
-        # if path is not None:
-        #   self.set_local_path(path, create_dir)
 
         # check if the file exists
         exists = os.path.exists(os.path.join(self._path, self.increment_name(name, 0)))
@@ -85,16 +109,12 @@ class Object():
         self.filepath = os.path.join(self._path, self.increment_name(name, i))
         return self.name
 
-    def set_local_path(self, directory, create_dir=False):
+    def set_local_path(self, directory):
         """
             sets path for local saving of information
             if create is true we will create the folder even if it doesnt exist
         """
-        if not os.path.exists(directory) and create_dir is True:
-            os.makedirs(directory)
-
-        if os.path.isdir(directory):
-            self._path = directory
+        self._path = directory
 
     def _prep_metadata(self):
         # copy the self.__dict__ and delete all that start with _
@@ -134,11 +154,18 @@ class Object():
             meta = json.loads(infile.read())
             self.__dict__.update(meta)
 
+    def file_exists(self):
+        return os.path.exists(self.filepath)
+
     def upload(self):
         meta = self._prep_metadata()
         meta["parent"] = self._parent
 
-        r = rinocloud.http.upload(self.filepath, meta)
+        if self.file_exists():
+            r = rinocloud.http.upload(self.filepath, meta)
+        else:
+            r = rinocloud.http.upload_meta(meta)
+
         assert r.status_code == 201, "Upload failed:\n%s" % r.text
         self._process_response_metadata(r.json())
 
