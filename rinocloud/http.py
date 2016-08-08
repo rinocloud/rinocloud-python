@@ -91,7 +91,7 @@ def download(_id, filepath, size):
     return r
 
 
-def query(query, truncate_metadata=True, limit=20, offset=0):
+def query(query, sort=None, truncate_metadata=True, limit=20, offset=0):
     headers = {
         'Authorization': 'Token %s' % rinocloud.api_key,
         'X-Requested-With': 'XMLHttpRequest'
@@ -103,6 +103,9 @@ def query(query, truncate_metadata=True, limit=20, offset=0):
         'limit': limit,
         'offset': offset
     }
+
+    if sort:
+        payload["sort"] = sort
 
     try:
         return requests.post(rinocloud.urls["query"], json=payload, headers=headers)

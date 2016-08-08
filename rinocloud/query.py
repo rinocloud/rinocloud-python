@@ -7,8 +7,11 @@ class Query():
         'eq', 'lt', 'lte', 'gt', 'gte', 'ne', 'in', 'nin', 'exists', 'or', 'string_contains'
     ]
 
-    def __init__(self, query_dict={}, results='The query method has not yet been called.'):
-        self.query_dict = query_dict
+    def __init__(self, query_dict=None, results='The query method has not yet been called.'):
+        self.query_dict = {}
+        if query_dict:
+            self.query_dict = query_dict
+        self._sort = None
         self.results = results
 
     def __repr__(self):
@@ -43,8 +46,12 @@ class Query():
                     self.query_dict[attr] = {'$' + operator: value}
         return self
 
+    def sort(self, sort):
+        self._sort = sort
+        return self
+
     def query(self, truncate_metadata=True, limit=20, offset=0, **kw):
-        r = rinocloud.http.query(self.query_dict, truncate_metadata, limit, offset)
+        r = rinocloud.http.query(self.query_dict, self._sort, truncate_metadata, limit, offset)
         assert r.status_code == 200, "Query failed: %s" % r.text
         reply = r.json()["result"]
         return [rinocloud.Object()._process_response_metadata(item, **kw) for item in reply]

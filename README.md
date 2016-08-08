@@ -204,7 +204,7 @@ We need to pass `overwrite=True` since rinocloud will refuse to edit existing fi
 
 ### Setting a parent
 
-To upload an object to a specific folder, you must set the '_parent' variable to be the object ID of the folder. So
+To upload an object to a specific folder, you must set the '\_parent' variable to be the object ID of the folder. So
 
 ```python
 obj._parent = 10

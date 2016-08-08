@@ -65,6 +65,11 @@ class RinocloudObjectTest(unittest.TestCase):
         self.assertEqual(o2.name, "file.txt")
         self.assertEqual(o2.filepath, os.path.join(rinocloud.path, "file.txt"))
 
+    def test_sort(self):
+        query = rinocloud.Query()
+        query.sort('-f')
+        self.assertEqual(query._sort, '-f')
+
 
 class RinocloudCollectionTest(unittest.TestCase):
     def setUp(self):
