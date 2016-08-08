@@ -316,7 +316,29 @@ trigger the query by adding filters and calling `.query()`
 list_of_objects = rinocloud.Query().filter(x=3).query()
 ```
 
-## Adding filters
+## Sorting query results
+
+Just add a call to `.sort('value to sort by')` to sort the resulting query.
+
+For example
+
+```python
+list_of_objects = rinocloud.Query().filter(x=3).sort("x").query()
+```
+
+To sort for ascending `x`, or
+
+```python
+list_of_objects = rinocloud.Query().filter(x=3).sort("-x").query()
+```
+
+To sort for descending `x`.
+
+Sorting also works for all alpha numeric fields in the object, or the objects metadata (but only for top level metadata fields).
+
+If you sort by some value, only data where that value exists will be returned.
+
+## Available filters
 
 You can add filters to the query object. Rinocloud allows you to filter using the following operators:
 
