@@ -31,7 +31,7 @@ def upload(filepath=None, meta=None):
 
     try:
         return requests.post(rinocloud.urls["upload"], data=m, headers=headers)
-    except requests.exceptions.RequestException.ConnectionError:
+    except requests.exceptions.ConnectionError:
         raise requests.exceptions.ConnectionError("Could not connect to specified domain %s" % rinocloud.api_domain)
 
 
@@ -43,7 +43,7 @@ def upload_meta(meta):
 
     try:
         return requests.post(rinocloud.urls["upload_meta"], json=meta, headers=headers)
-    except requests.exceptions.RequestException.ConnectionError:
+    except requests.exceptions.ConnectionError:
         raise requests.exceptions.ConnectionError("Could not connect to specified domain %s" % rinocloud.api_domain)
 
 
