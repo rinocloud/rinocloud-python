@@ -25,7 +25,7 @@ So far the library has only been tested/developed on Python2.7, we will add prop
 ```python
 import rinocloud as rino
 
-rino.api_key = '<Your API Token Here>'
+rinocloud.api_key = '<Your API Token Here>'
 ```
 
 ## Examples
@@ -39,10 +39,10 @@ import numpy as np
 
 import rinocloud as rino
 
-rino.api_key = "<your api key>"
-rino.set_local_path('data/', create_dir=True)
+rinocloud.api_key = "<your api key>"
+rinocloud.set_local_path('data/', create_dir=True)
 
-r = rino.Object()
+r = rinocloud.Object()
 r.set_name("file.txt")
 
 r.slope = 2
@@ -66,10 +66,10 @@ Pure python, without numpy
 ```python
 import rinocloud as rino
 
-rino.api_key = "<your api key>"
-rino.set_local_path('data/', create_dir=True)
+rinocloud.api_key = "<your api key>"
+rinocloud.set_local_path('data/', create_dir=True)
 
-r = rino.Object()
+r = rinocloud.Object()
 r.set_name("file.txt")
 
 r.slope = 2
@@ -97,7 +97,7 @@ q.filter(x="A22", y__gt=2.2)
 list_of_objects = q.query()
 ```
 
-### Using collections of objects
+
 
 ```python
 c = rinocloud.Collection()
@@ -114,7 +114,6 @@ c.add([o1, o2])
 # collections can have queryable metadata too
 c.x = 3
 c.sample_id = "A3303"
-
 with open(o1.filepath, 'w') as out:
     out.write('1\n2\n3')
 
@@ -165,7 +164,7 @@ print obj.filepath
 You can input metadata as keyword arguments on creation:
 
 ```python
-obj = rino.Object(key1=value1, key2=value2)
+obj = rinocloud.Object(key1=value1, key2=value2)
 ```
 
 or to set the values after creation:
@@ -195,7 +194,7 @@ data/
 ### Importing a locally saved objects
 
 ```
-obj = rino.Object()
+obj = rinocloud.Object()
 obj.set_name("file.txt", overwrite=True)
 obj.import_local_metadata()
 ```
@@ -232,7 +231,7 @@ Metadata can be added to an object after it has been uploaded. e.g.
 ```python
 obj.upload()
 obj.new_key = 'value4'
-obj.update()
+
 ```
 
 It will be updated on Rinocloud.
@@ -247,11 +246,35 @@ obj.download()
 The downloaded file can be renamed by passing a new file name to the download method:
 
 ```python
-r = rino.Object(id=3397)
+r = rinocloud.Object(id=3397)
 r.get([truncate_metadata=True])
 r.download()
 
 >>> [====================       ] 544/785 -- 00:32:45
+```
+
+## Versioning
+
+We automatically save a parameter in rinocloud called `etag` which is hash of all the data inside a file.
+This is useful if you want to check if a file already exists on rinocloud.
+
+You can calculate the `etag` of a local file using the `calculate_etag` function of the `rinocloud.Object()` class. Since `calculate_etag` is an relatively intense calculation, and often the `etag` isn't nessecary; `etag` will be `None` until `calculate_etag` is called.
+
+```python
+
+obj  = rinocloud.Object()
+obj.set_name("file.txt")
+
+obj.calculate_etag()
+
+print (obj.etag)  # something like fe743783afdf86af96aac1781ceff960-1
+```
+
+You can also check if files exist already on Rinocloud using the etag;
+
+```python
+rino_files = rinocloud.Query().filter(etag="fe743783afdf86af96aac1781ceff960-1").query
+>>> [<rinocloud.Object name=New Text Document.txt id=21833>]
 ```
 
 ## Collections
@@ -303,7 +326,6 @@ It will download as whatever the filename is in Rinocloud, or it will increment 
 Rinocloud also contains tools for querying. You can query any and multiple metadata fields of all objects saved to Rinocloud.
 
 ## Creating a query object
-
 To make a query, you must create a query object:
 ```python
 qobj = rinocloud.Query()
@@ -419,10 +441,10 @@ rinocloud.Query().filter(<your filter args>).count()
 Batch operations are designed to streamline working with multiple objects. You can perform the download, upload, add, get and update methods on a list of objects using:
 
 ```python
-rino.batch.download(<list of objects>)
-rino.batch.upload(<list of objects>)
-rino.batch.get(<list of objects>)
-rino.batch.update(<list of objects>)
+rinocloud.batch.download(<list of objects>)
+rinocloud.batch.upload(<list of objects>)
+rinocloud.batch.get(<list of objects>)
+rinocloud.batch.update(<list of objects>)
 ```
 
 ## Development
@@ -445,7 +467,7 @@ python setup.py test
 
 or, if python 3 is named `python3`
 
-```python
+
 python3 setup.py test
 ```
 

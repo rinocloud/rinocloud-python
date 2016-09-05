@@ -1,6 +1,10 @@
 import json
 import os
+import hashlib
 import rinocloud
+
+
+CHUNK_SIZE = 6 * 1024 * 1024
 
 
 class Object(object):
@@ -15,6 +19,7 @@ class Object(object):
         self.updated_on = None
         self._cloud_name = None
         self.name = None
+        self.etag = None
 
         # these are some variables we will keep hidden, marked with underscore
         self._size = None
@@ -132,6 +137,7 @@ class Object(object):
         self.id = response_metadata["id"]
         self.created_on = response_metadata["created_on"]
         self.updated_on = response_metadata["updated_on"]
+        self.etag = response_metadata["etag"]
         self._cloud_name = response_metadata["name"]
         self._rino_type = response_metadata["type"]
 
@@ -159,6 +165,32 @@ class Object(object):
 
     def file_exists(self):
         return os.path.exists(self.filepath)
+
+    def calculate_etag(self, expected=None):
+        """
+            calculates a multipart upload etag in the same way as amazon s3
+            args:
+                source_path -- The file to calculate the etage for
+                chunk_size -- The chunk size to calculate for.
+                expected -- optional If passed a string, the string
+                will be compared to the resulting etag and raise an
+                exception if they don't match
+        """
+        md5s = []
+        with open(self.filepath, 'rb') as fp:
+            while True:
+                data = fp.read(CHUNK_SIZE)
+                if not data:
+                    break
+                md5s.append(hashlib.md5(data))
+
+        digests = b"".join(m.digest() for m in md5s)
+
+        new_md5 = hashlib.md5(digests)
+        new_etag = '%s-%s' % (new_md5.hexdigest(),len(md5s))
+        self.etag = new_etag
+
+        return new_etag
 
     def upload(self):
         meta = self._prep_metadata()

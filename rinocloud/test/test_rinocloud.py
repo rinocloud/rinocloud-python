@@ -52,6 +52,17 @@ class RinocloudObjectTest(unittest.TestCase):
         self.assertEqual(o2.name, "file1.txt")
         self.assertEqual(o2.filepath, os.path.join(rinocloud.path, "file1.txt"))
 
+    def test_create_object_hash(self):
+        o = rinocloud.Object()
+        o.set_name("file.txt")
+
+        with open(o.filepath, 'w') as outfile:
+            outfile.write('1\n2\n3\n4\n5')
+
+        o.calculate_etag()
+
+        self.assertEqual(o.etag, "fe743783afdf86af96aac1781ceff960-1")
+
     def test_create_object_name_overwrite(self):
         o = rinocloud.Object()
         o.set_name("file.txt")
