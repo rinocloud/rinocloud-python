@@ -20,6 +20,7 @@ class Object(object):
         self._cloud_name = None
         self.name = None
         self.etag = None
+        self.versions = []
 
         # these are some variables we will keep hidden, marked with underscore
         self._size = None
@@ -140,6 +141,7 @@ class Object(object):
         self.etag = response_metadata["etag"]
         self._cloud_name = response_metadata["name"]
         self._rino_type = response_metadata["type"]
+        self.versions = response_metadata["versions"]
 
         if self.name is None:
             self.set_name(response_metadata["name"], **kw)
