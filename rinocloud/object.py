@@ -129,7 +129,7 @@ class Object(object):
         # copy the self.__dict__ and delete all that start with _
         obj = self.__dict__.copy()
         [obj.pop(item) for item in list(obj.keys()) if item.startswith('_')]
-        # obj.pop('filepath')
+        obj.pop('filepath')
         return obj
 
     def _process_response_metadata(self, response_metadata, **kw):
